@@ -11,7 +11,7 @@ def check_quality(seqs, quality_threshold=0):
 
 
 
-    def check_gc(new_sq, gc_bounds=(0, 100)):
+def check_gc(new_sq, gc_bounds=(0, 100)):
         if not isinstance(gc_bounds, tuple):
             gc_bounds = (0, gc_bounds)
         seqs_after_gc={}
@@ -29,7 +29,7 @@ def check_quality(seqs, quality_threshold=0):
 
 
 
-    def check_lenght(seqs_after_gc, length_bounds=(0, 2**32)):
+def check_lenght(seqs_after_gc, length_bounds=(0, 2**32)):
         if not isinstance(length_bounds, tuple):
             length_bounds = (0, length_bounds)
         seqs_after_len={}
