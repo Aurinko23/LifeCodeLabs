@@ -1,3 +1,34 @@
+import os
+
+
+def read_fastq(input_fastq):
+    with open(input_fastq, 'r') as file:
+        f = file.readlines()
+
+    fast = {}
+    for index in range(0,len(f),4):
+        name = f[index].strip()
+        sequence = f[index+1].strip()
+        quality = f[index+3].strip()
+        fast[name] = (sequence, quality)
+
+    return fast
+
+
+def write_fastq(output_fastq, final_seqs):
+    result = []
+    for name, (sequence, quality) in final_seqs.items():
+        result += [name, sequence, name.replace('@','+'), quality]
+
+    result_string = '\n'.join(result)
+
+    full_output_fastq = os.path.join("filtered", output_fastq)
+    os.makedirs("filtered", exist_ok=True)
+
+    with open(full_output_fastq, 'w') as file:
+        file.write(result_string)
+
+
 def check_quality(seqs, quality_threshold=0):
     new_seqs = {}
     for name, (sequence, quality) in seqs.items():

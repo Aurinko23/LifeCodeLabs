@@ -1,4 +1,9 @@
-from Moduls.moduls_filter_fastq import check_quality, check_gc, check_lenght
+from Moduls.moduls_filter_fastq import (
+    check_quality,
+    check_gc,
+    check_lenght,
+    read_fastq
+)
 from Moduls.moduls_dna_rna_tools import (
     transcribe,
     reverse,
@@ -9,12 +14,13 @@ from Moduls.moduls_dna_rna_tools import (
 
 
 def filter_fastq(
-    seqs, gc_bounds=(0, 100), length_bounds=(0, 2 ** 32), quality_threshold=0
+    input_fastq, output_fastq, gc_bounds=(0, 100), length_bounds=(0, 2 ** 32), quality_threshold=0
 ):
-
+    seqs = read_fastq(input_fastq)
     new_sq = check_quality(seqs, quality_threshold)
     seqs_after_gc = check_gc(new_sq, gc_bounds)
-    return check_lenght(seqs_after_gc, length_bounds)
+    seqs_after_lenght = check_lenght(seqs_after_gc, length_bounds)
+    write_fastq(output_fastq, seqs_after_lenght)
 
 
 def run_dna_rna_tools(*args):
