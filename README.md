@@ -10,11 +10,9 @@ LifeCodeLabs is implemented in the Python programming language. The project is g
 
 ## Project Structure
 
-- `LifeCodeLabs.py` — the main module coordinating the operation of the tools.
-- `bio_files_processor.py` — a tool for preliminary data viewing and analysis.
-- `Moduls/`
-  - `moduls_dna_rna_tools.py` — tools for working with DNA and RNA.
-  - `moduls_filter_fastq.py` — tools for filtering FASTQ data.
+- `Abtract_sequences.py` —  tools for working with nucleic and amino acids.
+- `fasstq_filter.py` —tools for filtering FASTQ data.
+
 
 ## Functionality
 
@@ -29,124 +27,77 @@ The program accepts 5 arguments: `input_fastq`, `output_fastq`, `gc_bounds`, `le
 
 As a result, the program returns a similar file consisting only of those sequences that meet all the conditions.
 
-### Operations with DNA and RNA
+### Operations with nucleic and amino acids
 
-- `transcribe` — returns the transcribed sequence.
-- `reverse` — returns the reversed sequence.
-- `complement` — returns the complementary sequence.
-- `reverse_complement` — returns the reverse complementary sequence.
+The library is organized around an abstract base class and several concrete implementations:
 
-The program requires an arbitrary number of arguments with DNA or RNA sequences and the name of the procedure to perform.
-- If one sequence is provided, it returns a string with the result. If multiple sequences are provided, it returns a list of strings.
-- The program checks that **only** nucleic acid sequences (RNA or DNA) are provided. Otherwise, it returns an input error.
+- **BiologicalSequence (Abstract Base Class)**  
+  Provides common functionality for all biological sequences such as getting the length and accessing sequence elements. It requires subclasses to implement a `verification()` method for validating the sequence.
 
-### Reading Bioinformatics Files
+- **NucleicAcidSequence (Derived Class)**  
+  Represents a generic nucleic acid sequence (DNA or RNA). It includes:
+  - **Verification:** Checks that the sequence contains only valid nucleotide characters (`A`, `C`, `U`/`T`, `G`), and ensures that RNA and DNA characters are not mixed.
+  - **Complement Calculation:** Computes the complement of the sequence using standard nucleotide pairing.
+  - **Reversal:** Implements methods for reversing the sequence and obtaining its reverse complement.
 
-- `convert_multiline_fasta_to_oneline` - accepts 2 arguments (`input_fasta` and `output_fasta`). Reads the input FASTA file containing a sequence (DNA/RNA/protein), converts the given sequence into a single line, and writes it to `output_fasta`.
-- `output_fasta` - accepts 2 arguments (`input_file`, `output_file`), reads the specified txt file, finds the best matches with the reference database, and saves the protein name in `output_file`.
+- **RNASequence (Derived from NucleicAcidSequence)**  
+  Represents an RNA sequence, inheriting the properties and methods from `NucleicAcidSequence`.
 
-### Usage Examples
+- **DNASequence (Derived from NucleicAcidSequence)**  
+  Represents a DNA sequence and includes:
+  - **Transcription:** Converts a DNA sequence to its corresponding RNA sequence by replacing thymine (`T/t`) with uracil (`U/u`).
 
-### FASTQ Filtering
+- **AminoAcidSequence (Derived Class)**  
+  Represents an amino acid sequence and includes a method to check for the presence of basic amino acids (lysine, arginine, and histidine).
 
-```python
-seqs = {
-    'seq1': ('ATCG', '!!!!'),
-    'seq2': ('GCTA', '++++')
-}
-filtered_seqs = filter_fastq(seqs, gc_bounds=(40, 60), quality_threshold=20)
-```
-### Operations with DNA and RNA
-run_dna_rna_tools('ATG', 'transcribe')    # 'AUG'
-run_dna_rna_tools('ATG', 'reverse')       # 'GTA'
-run_dna_rna_tools('AtG', 'complement')    # 'TaC'
-run_dna_rna_tools('ATg', 'reverse_complement') # 'cAT'
-run_dna_rna_tools('ATG', 'aT', 'reverse') # ['GTA', 'Ta']
+---
 
-### Authors
-Evgeniya Tsymbalova, Saint Petersburg, 2024.
+## Features
 
-### Software Requirements
-The project requires Python 3.6 or higher.
-
-<!--
-# LifeCodeLabs
-
-## Описание проекта
-
-LifeCodeLabs — это комплексный программный пакет для анализа биологических данных, специализирующийся на работе с нуклеиновыми кислотами: ДНК и РНК. Проект предназначен для ученых и исследователей, которым требуется надежный инструмент для анализа генетических данных.
-
-Основная цель проекта — упростить сложные процессы обработки последовательностей, предоставляя пользователю гибкий набор инструментов. Эти инструменты позволяют проводить качественную фильтрацию данных, осуществлять основные операций с нуклеиновыми кислотами, такие как транскрипция и трансляция ДНК, получение комплеменатарной и обратно комплементарной последовательностей для дальнейших исследований и экспериментов.
-
-LifeCodeLabs реализован на языке программирования Python. Проект ориентирован на использование в учебных и научных исследованиях, где требуется надежность и воспроизводимость результатов.
-
-## Структура проекта
-
-- `LifeCodeLabs.py` — основной модуль, координирующий работу инструментов.
-- `bio_files_processor.py` — инструмент, для предварительного просмотра и анализа данных 
-- `Moduls/`
-  - `moduls_dna_rna_tools.py` — инструменты для работы с ДНК и РНК.
-  - `moduls_filter_fastq.py` — инструменты для фильтрации данных FASTQ.
+- **Sequence Verification:**  
+  Ensures that nucleic acid sequences contain only valid characters and that DNA and RNA characters are not mixed.
   
-
-## Функционал
-
-### Фильтрация FASTQ
-
-Функция фильтрует последовательности на основе качества, содержания GC и длины.
-Программа принимает на вход  5 аргументов: `input_fastq`, `output_fastq`, `gc_bounds`, `length_bounds`, `quality_threshold`:
-    - `input_fastq` - файл, содержащий fastq-сиквенсы со следующей струкурой: идентификатор последовательности, последовательность, идентификатор последовательности, качество. 
-    - `gc_bounds` - интервал GC состава (в процентах) для фильтрации (по-умолчанию равен (0, 100)). В аргумент можно передать одно число, тогда по умолчанию данное число будет использоваться в качестве верхней границы и программа отфильтрует риды с качеством меньше введенного числа.
-    - `length_bounds` - интервал длины для фильтрации, по-умолчанию равен (0, 2**32).В аргумент можно передать одно число, тогда по умолчанию данное число будет использоваться в качестве верхней границы и программа отфильтрует риды с длиной меньше введенного числа.
-    - `quality_threshold` - пороговое значение среднего качества рида для фильтрации, по-умолчанию равно 0 (шкала phred33). Риды со средним качеством по всем нуклеотидам ниже порогового отбрасываются. </br></br>
-   
-  По итогам работы программа возвращает аналогичный файл, состоящий только из тех сиквенсов, которые удовлетвопмли всем условиям. 
-
-
-### Операции с ДНК и РНК
-
-- `transcribe` — возвращает транскрибированную последовательность
-- `reverse` — возвращает развёрнутую последовательность
-- `complement` — возвращает комплементарную последовательность
-- `reverse_complement` — возвращает обратную комплементарную последовательность
-
- Программа требует произвольное количество аргументов с последовательностями ДНК или РНК, и название процедуры которую необходимо выполнить. 
- - Если подана одна последовательность - возвращается строка с результатом. Если подано несколько - возвращается список из строк. 
-- Программа проверяет, что поданы **только** последовательности нуклеиновых кислот (РНК или ДНК). В противном случае возвращает ошибку введения.
-
-### Чтение биоинформатических файлов
-
--`convert_multiline_fasta_to_oneline` - принимает на вход 2 аргумента (input_fasta и output_fasta). Читает поданный на вход fasta-файл, содержащий последовательность (ДНК/РНК/белка) преобразуе данную последоваельность в единую строку и записывае в output_fasta. 
--`output_fasta` - принимает на вход 2 аргумента (input_file, output_file), читает заданный txt файл, находит наилучшее совпадения с референсной базой и сохранить название белка в output_file.
+- **Complement and Reverse Complement:**  
+  Allows users to compute the complement of a nucleic acid sequence and then reverse it to obtain the reverse complement.
   
-## Примеры использования
+- **Transcription (DNA to RNA):**  
+  Provides an easy way to transcribe a DNA sequence into its RNA counterpart.
+  
+- **Basic Amino Acid Detection:**  
+  Checks if an amino acid sequence contains any basic amino acids (K, R, H).
 
-### Фильтрация FASTQ
-
+## Usage Examples
 ```python
-seqs = {
-    'seq1': ('ATCG', '!!!!'),
-    'seq2': ('GCTA', '++++')
-}
-filtered_seqs = filter_fastq(seqs, gc_bounds=(40, 60), quality_threshold=20)
+# Creating a DNA Sequence and Transcribing to RNA
+from Abtract_sequences import DNASequence
+
+dna_seq = DNASequence("ATGCGTAC")
+dna_seq.verification()
+rna_seq = dna_seq.transcribe()
+print("Transcribed RNA sequence:", rna_seq.bioseq)
 ```
 
-### Операции с ДНК и РНК
-
-
 ```python
-run_dna_rna_tools('ATG', 'transcribe') # 'AUG'
-run_dna_rna_tools('ATG', 'reverse') # 'GTA'
-run_dna_rna_tools('AtG', 'complement') # 'TaC'
-run_dna_rna_tools('ATg', 'reverse_complement') # 'cAT'
-run_dna_rna_tools('ATG', 'aT', 'reverse') # ['GTA', 'Ta']
+# Computing Complement and Reverse Complement
+from Abtract_sequences import DNASequence
+
+dna_seq = DNASequence("ATGCGTAC")
+complement_seq = dna_seq.complement()
+print("Complement:", complement_seq.bioseq)
+reverse_complement_seq = dna_seq.reverse_complement()
+print("Reverse Complement:", reverse_complement_seq.bioseq)
 ```
 
-## Авторы
+```python
+# Working with Amino Acid Sequences
+from Abtract_sequences import AminoAcidSequence
 
-Цымбалова Евгения, Санкт-Петербург, 2024г.
+aa_seq = AminoAcidSequence("ACDEFGHIKLMNPQRSTVWY")
+aa_seq.is_basic()
+```
 
-## Требования к программному обеспечению
+## Authors
+Evgeniya Tsymbalova, Saint Petersburg, 2025.
 
-Проект требует установки Python 3.6 или выше.
--->
+## Software Requirements
+The project requires Python 3.9 or higher.
